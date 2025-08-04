@@ -43,22 +43,22 @@ class DetaiModel extends Model
     //------------------//
     public function KinhPhi()
     {
-        return $this->hasMany(KinhphiModel::class, 'id_detai', 'id_detai');
+        return $this->hasMany(KinhphiModel::class, 'id_detai');
     }
     public function TienDo()
     {
-        return $this->hasMany(TiendoModel::class, 'id_detai', 'id_detai');
+        return $this->hasMany(TiendoModel::class, 'id_detai');
     }
     public function ThanhVien()
     {
-        return $this->hasMany(ThanhvienModel::class, 'id_detai', 'id_detai');
+        return $this->hasMany(ThanhvienModel::class, 'id_detai');
     }
     public function TVhoidong()
     {
-        return $this->hasMany(TVhoidongModel::class, 'id_detai', 'id_detai');
+        return $this->hasMany(TVhoidongModel::class, 'id_detai');
     }
     public function Sanpham()
     {
-        return $this->hasMany(SanphamModel::class, 'id_detai', 'id_detai');
+        return $this->hasMany(SanphamModel::class, 'id_detai');
     }
 }

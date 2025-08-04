@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
@@ -11,9 +10,53 @@ use App\Models\TiendoModel;
 use App\Models\ThanhvienModel;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-
+use App\Models\TVhoidongModel;
 class DetaiController extends Controller
 {
+    public function destroy($id)
+    {
+        try {
+            $detai = DetaiModel::find($id);
+            if (!$detai) {
+                return response()->json(['error' => 'Không tìm thấy đề tài'], 404);
+            }
+            // Xoá các bản ghi liên quan
+            ThanhvienModel::where('id_detai', $id)->delete();
+            $tiendos = TiendoModel::where('id_detai', $id)->get();
+            foreach ($tiendos as $td) {
+                KinhphiModel::where('id_tiendo', $td->id_tiendo)->delete();
+            }
+            TiendoModel::where('id_detai', $id)->delete();
+            // Xoá đề tài
+            $detai->delete();
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            \Log::error('Lỗi xoá đề tài: ' . $e->getMessage());
+            return response()->json(['error' => 'Lỗi server: ' . $e->getMessage()], 500);
+        }
+    }
+    // API: Lấy đầy đủ thông tin đề tài và các bảng liên quan
+    public function getFullDetail($id)
+    {
+        try {
+            $detai = DetaiModel::with([
+                'kinhPhi',
+                'thanhVien',
+                'tienDo',
+                'sanpham',
+                'lichvucnghiencuu',
+                'loaiDT',
+                'thongtincanhan'
+            ])->find($id);
+            if (!$detai) {
+                return response()->json(['error' => 'Không tìm thấy đề tài'], 404);
+            }
+            return response()->json($detai);
+        } catch (\Exception $e) {
+            \Log::error('Lỗi lấy chi tiết đề tài: ' . $e->getMessage());
+            return response()->json(['error' => 'Lỗi server: ' . $e->getMessage()], 500);
+        }
+    }
     //controller Giao diện
     function view() {}
     // controller Backend

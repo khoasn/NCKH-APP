@@ -57,6 +57,12 @@
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/toastr@2.1.4/build/toastr.min.js"></script>
+    <script>
+        // Lắng nghe sự kiện đăng nhập thành công từ JS
+        document.addEventListener('manager-login-success', function () {
+            window.location.href = '/quangly.blade.php';
+        });
+    </script>
     @vite(['resources/js/auth/login.js'])
 </body>
 

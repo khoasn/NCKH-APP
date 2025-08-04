@@ -54,6 +54,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 });
                 const data = await response.json();
                 if (response.ok && data.success) {
+                    if (data.role && data.role === 'manager') {
+                        window.location.href = '/quangly.blade.php';
+                        return;
+                    }
                     window.location.href = data.redirect || '/';
                     return;
                 }
