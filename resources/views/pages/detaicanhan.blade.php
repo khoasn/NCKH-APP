@@ -72,6 +72,10 @@
                 <div class="alert alert-info">Không có thành viên nào.</div>
             @endif
             <div class="border-start border-4 border-primary ps-3 py-2 mb-3 bg-light fw-bold">
+                Hội đồng
+            </div>
+            <div class="alert alert-info">Chưa có hội đồng</div>
+            <div class="border-start border-4 border-primary ps-3 py-2 mb-3 bg-light fw-bold">
                 Tiến độ thực hiện
             </div>
             @forelse ($tiendo as $td)
@@ -83,9 +87,9 @@
                             </div>
                             <div>
                                 <span class="badge 
-                                                                                        @if($td->trangthai == 'Hoàn thành') bg-success 
-                                                                                        @elseif($td->trangthai == 'Đang thực hiện') bg-warning 
-                                                                                        @else bg-secondary @endif">
+                            @if($td->trangthai == 'Hoàn thành') bg-success 
+                            @elseif($td->trangthai == 'Đang thực hiện') bg-warning 
+                            @else bg-secondary @endif">
                                     {{ $td->trangthai }}
                                 </span>
                             </div>
@@ -172,7 +176,7 @@
             @endforelse
         @else
             <div class="alert alert-info" role="alert">
-                Bạn chưa đăng ký đề tài nào.
+                Bạn chưa có đề tài được duyệt.
             </div>
         @endif
     </div>

@@ -15,6 +15,7 @@ export default defineConfig({
                 'resources/js/auth/login.js',
                 'resources/js/pages/dangkydetai.js',
                 'resources/js/pages/detaicanhan.js',
+                'resources/js/pages/trangchu.js',
 
             ],
             refresh: true,

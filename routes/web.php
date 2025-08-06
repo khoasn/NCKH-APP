@@ -59,10 +59,17 @@ Route::get('/', [GiaodienNguoiDungController::class, 'TrangDangnhap']);
 Route::get('/trangdangnhap', [GiaodienNguoiDungController::class, 'TrangDangnhap']);
 Route::middleware(['checknguoidung'])->group(function () {
     Route::get('/detainckh/detaicuatoi', [GiaodienNguoiDungController::class, 'TrangDeTaiCaNhan']);
+    Route::get('/quanlydetai', [GiaodienNguoiDungController::class, 'TrangQLdetai']);
     Route::get('/thongtincanhan', [GiaodienNguoiDungController::class, 'TrangCaNhan']);
     Route::get('/detainckh/dangkydetai', [GiaodienNguoiDungController::class, 'TrangDangKyDetai']);
     Route::get('/detainckh', [GiaodienNguoiDungController::class, 'TrangTimKiemDetai']);
 });
+/*
+| Tìm kiếm---------------------------------------------
+*/
+Route::get('/detai/{idloai}', [GiaodienNguoiDungController::class, 'timkiemtheoloai']);
+
+
 // giao diện admin
 Route::get('/admin/trangquanly', [GiaodienQLController::class, 'dashboardAdmin']);
 // giao diện quản lý hệ thống
