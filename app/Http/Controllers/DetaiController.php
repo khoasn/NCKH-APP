@@ -7,12 +7,14 @@ use App\Models\LoaidetaiModel;
 use App\Models\KinhphiModel;
 use App\Models\DetaiModel;
 use App\Models\TiendoModel;
+use App\Models\ThongtincanhanModel;
 use App\Models\ThanhvienModel;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Models\TVhoidongModel;
 class DetaiController extends Controller
 {
+<<<<<<< HEAD
     public function destroy($id)
     {
         try {
@@ -60,40 +62,47 @@ class DetaiController extends Controller
     //controller Giao diện
     function view() {}
     // controller Backend
+=======
+>>>>>>> upstream/Khoa
     public function DangkyDetai(DetaiRequest $request)
     {
-        $user = auth()->user();
-        $ttcn = $user->thongtincanhan;
-
-        if (!$ttcn) {
-            Log::warning('Không có thông tin cá nhân. Gán tạm id_ttcn = user_id', ['user_id' => $user->id]);
-            // return response()->json([
-            //     'message' => 'Không tìm thấy thông tin cá nhân.',
-            // ], 404);
-            $id_ttcn = $user->id;
-        } else {
-            $id_ttcn = $ttcn->id_ttcn;
+        // Kiểm tra người dùng đã có đề tài trạng thái "Đã duyệt" chưa
+        $userId = $request->input('id_nguoidung');
+        $ttcn = ThongtincanhanModel::where('user_id', $userId)->first();
+        $detaiDaDuyet = DetaiModel::where('id_ttcn', $ttcn?->id_ttcn)
+            ->where('trangthai', 'Đã duyệt')
+            ->first();
+        if ($detaiDaDuyet) {
+            Log::debug('Người dùng đã có đề tài trạng thái Đã duyệt', [
+                'user_id' => $userId,
+                'id_detai' => $detaiDaDuyet->id_detai
+            ]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Bạn đã có đề tài được duyệt, không thể đăng ký thêm!',
+            ], 403);
         }
 
         if (!$this->kiemTraDK($request)) {
             Log::debug('Không đáp ứng điều kiện đăng ký đề tài', [
                 'request' => $request->all(),
-                'user_id' => $user->id,
+                'user_id' => $userId,
             ]);
             return response()->json([
+                'success' => false,
                 'message' => 'Không đáp ứng điều kiện đăng ký đề tài',
             ], 403);
         }
 
         DB::beginTransaction();
         try {
-            Log::debug('Bắt đầu tạo đề tài', [
-                'user_id' => $user->id,
+            Log::debug('Bắt đầu tạo đề tài',  [
+                'user_id' => $request->input('id_nguoidung'),
                 'payload' => $request->all()
             ]);
-
+            $id_ttcn = $ttcn->id_ttcn;
             $detai = DetaiModel::create([
-                'id_ttcn'      => 1,
+                'id_ttcn'      => $id_ttcn,
                 'id_lvnc'      => $request->input('linhvuc'),
                 'id_loaidt'    => $request->input('loaidetai'),
                 'tendetai'     => $request->input('tendetai'),
@@ -101,6 +110,7 @@ class DetaiController extends Controller
                 'donvi'        => $request->input('Donvi'),
                 'sodt'         => $request->input('Sodienthoai'),
                 'email'        => $request->input('Email'),
+                'sothang'        => $request->input('sothang'),
                 'tgbatdau'     => $request->input('TGbatdau') ?? null,
                 'tgketthuc'    => $request->input('TGketthuc') ?? null,
                 'sogiotg'      => $request->input('Sogiotacgia'),
@@ -108,9 +118,7 @@ class DetaiController extends Controller
                 'diemanhgia'   => null,
                 'nhanxet'      => null,
             ]);
-
             Log::debug('Đã tạo đề tài', ['id_detai' => $detai->id_detai]);
-
             foreach ($request->input('thanhvien', []) as $tv) {
                 ThanhvienModel::create([
                     'id_detai'       => $detai->id_detai,
@@ -122,7 +130,6 @@ class DetaiController extends Controller
                 ]);
             }
             Log::debug('Đã thêm thành viên');
-
             foreach ($request->input('tiendo', []) as $td) {
                 $tiendo = TiendoModel::create([
                     'id_detai'   => $detai->id_detai,
@@ -147,11 +154,11 @@ class DetaiController extends Controller
                 }
             }
             Log::debug('Đã thêm tiến độ và kinh phí');
-
             DB::commit();
             Log::debug('Hoàn tất');
 
             return response()->json([
+                'success' => true,
                 'message' => 'Đăng ký đề tài thành công!',
                 // 'data' => $detai
             ], 201);
@@ -164,6 +171,7 @@ class DetaiController extends Controller
             ]);
 
             return response()->json([
+                'success' => false,
                 'message' => 'Lỗi khi đăng ký đề tài',
                 'error' => $e->getMessage()
             ], 500);
@@ -199,5 +207,77 @@ class DetaiController extends Controller
             return false;
         }
         return true;
+    }
+    /*Thao tác với đề tài */
+    public function ThemKinhPhi(Request $request, $id)
+    {
+        Log::debug('Thêm kinh phí cho đề tài', [
+            'request' => $request->all(),
+        ]);
+        $validated = $request->validate([
+            'id_detai'   => 'required|integer|exists:detai,id_detai',
+            'ctkhoanchi' => 'required|string|max:255',
+            'donvitinh'  => 'required|string|max:50',
+            'soluong'    => 'required|integer|min:1',
+            'dongia'     => 'required|numeric|min:0',
+            'thanhtien'  => 'required|numeric|min:0',
+        ]);
+        try {
+            $kinhphi = KinhphiModel::create([
+                'id_detai'   => $validated['id_detai'],
+                'id_tiendo'  => $id,
+                'ctkhoanchi' => $validated['ctkhoanchi'],
+                'donvitinh'  => $validated['donvitinh'],
+                'soluong'    => $validated['soluong'],
+                'dongia'     => $validated['dongia'],
+                'thanhtien'  => $validated['thanhtien'],
+            ]);
+            return response()->json([
+                'success' => true,
+                'message' => 'Kinh phí đã được thêm thành công!',
+                'data' => $kinhphi
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Lỗi khi thêm kinh phí', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'request' => $request->all(),
+            ]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Lỗi khi thêm kinh phí',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+    /*Delete controller */
+    public function xoaKinhPhi($id_detai, $id_tiendo, $id_kinhphi)
+    {
+        Log::debug('Xoá kinh phí', [
+            'id_kp' => $id_kinhphi,
+            'id_detai' => $id_detai,
+            'id_tiendo' => $id_tiendo,
+        ]);
+        try {
+            KinhphiModel::where('id_kp', $id_kinhphi)
+                ->where('id_detai', $id_detai)
+                ->where('id_tiendo', $id_tiendo)
+                ->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Kinh phí đã được xoá thành công!'
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Lỗi khi xoá kinh phí', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Lỗi khi xoá kinh phí',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 }

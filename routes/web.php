@@ -20,10 +20,12 @@ use App\Http\Controllers\GiaodienNguoiDungController;
 | Đăng nhập, đăng xuất---------------------------------
 */
 
-Route::post('/loginuser', [DangNhapController::class, 'loginNguoidung']);
+Route::post('/loginuser', [DangNhapController::class, 'loginNguoidung'])->name('login');;
+Route::post('/logoutuser', [DangNhapController::class, 'Dangxuat'])->name('logout');;
 /*
-| Giao diện---------------------------------------------
+| Giao diện view---------------------------------------------
 */
+<<<<<<< HEAD
 Route::get('/', function () {
     return redirect()->route('trangdangnhap');
 });
@@ -52,3 +54,28 @@ route::post('/pdangkydetai', [DetaiController::class, 'DangkyDetai']);
 Route::get('/api/detai/all', function () {
     return response()->json(\App\Models\DetaiModel::all());
 });
+=======
+Route::get('/', [GiaodienNguoiDungController::class, 'TrangDangnhap']);
+Route::get('/trangdangnhap', [GiaodienNguoiDungController::class, 'TrangDangnhap']);
+Route::middleware(['checknguoidung'])->group(function () {
+    Route::get('/detainckh/detaicuatoi', [GiaodienNguoiDungController::class, 'TrangDeTaiCaNhan']);
+    Route::get('/thongtincanhan', [GiaodienNguoiDungController::class, 'TrangCaNhan']);
+    Route::get('/detainckh/dangkydetai', [GiaodienNguoiDungController::class, 'TrangDangKyDetai']);
+    Route::get('/detainckh', [GiaodienNguoiDungController::class, 'TrangTimKiemDetai']);
+});
+// giao diện admin
+Route::get('/admin/trangquanly', [GiaodienQLController::class, 'dashboardAdmin']);
+// giao diện quản lý hệ thống
+Route::get('/quanlyhethong/trangquanly', [GiaodienQLController::class, 'dashboardQL']);
+
+
+/*
+| Backend route post---------------------------------------------
+*/
+//Đề tài
+Route::middleware(['checknguoidung'])->group(function () {
+    route::post('/detai/dangkydetai', [DetaiController::class, 'DangkyDetai'])->name('detai.dangkydetai');
+    route::post('/tiendo/{id}/themkinhphi', [DetaiController::class, 'ThemKinhPhi'])->name('detai.ThemKinhPhi');
+    route::delete('/detai/{id_detai}/tiendo/{id_tiendo}/kinhphi/{id_kinhphi}', [DetaiController::class, 'xoaKinhPhi'])->name('detai.xoaKinhPhi');
+});
+>>>>>>> upstream/Khoa
